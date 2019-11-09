@@ -10,6 +10,13 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.androlord.music_shop.Support.Login;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -17,9 +24,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MainActivity extends AppCompatActivity {
     FirebaseAuth.AuthStateListener authStateListener;
     FirebaseAuth mAuth;
+    private RequestQueue mQueue;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -79,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         mAuth=FirebaseAuth.getInstance();
+        mQueue= Volley.newRequestQueue(this);
+        jsonParse();
 
 
 
@@ -100,5 +114,49 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
+    }
+
+    private void jsonParse() {
+        String url="http://starlord.hackerearth.com/studio";
+        Log.d("ak47", "jsonParse: ");
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
+                Request.Method.GET,
+                url,
+                null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+
+                        // Process the JSON
+                        try{
+                            // Loop through the array elements
+                            for(int i=0;i<response.length();i++){
+                                // Get current json object
+                                JSONObject music = response.getJSONObject(i);
+
+
+                                String song = music.getString("song");
+                                String artists = music.getString("artists");
+                                String cover_image = music.getString("cover_image");
+                                String url=music.getString("url");
+
+
+                            }
+                        }catch (JSONException e){
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener(){
+                    @Override
+                    public void onErrorResponse(VolleyError error){
+                        // Do something when error occurred
+                        error.printStackTrace();
+                    }
+                }
+        );
+
+        // Add JsonArrayRequest to the RequestQueue
+        mQueue.add(jsonArrayRequest);
     }
 }
