@@ -2,6 +2,8 @@ package com.androlord.music_shop;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,6 +19,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.androlord.music_shop.Adapter.MusicListAdapter;
+import com.androlord.music_shop.Data.Songs;
 import com.androlord.music_shop.Support.Login;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -28,10 +32,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
     FirebaseAuth.AuthStateListener authStateListener;
     FirebaseAuth mAuth;
     private RequestQueue mQueue;
+    RecyclerView songList;
+    ArrayList<Songs> list=new ArrayList<Songs>();
+    MusicListAdapter adapter;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -92,7 +101,13 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         mAuth=FirebaseAuth.getInstance();
         mQueue= Volley.newRequestQueue(this);
+        songList=findViewById(R.id.songlist);
+        songList.setLayoutManager(new GridLayoutManager(this,2));
+        adapter=new MusicListAdapter(this,list);
+        songList.setAdapter(adapter);
         jsonParse();
+
+
 
 
 
@@ -139,9 +154,12 @@ public class MainActivity extends AppCompatActivity {
                                 String artists = music.getString("artists");
                                 String cover_image = music.getString("cover_image");
                                 String url=music.getString("url");
-
+                                Log.d("ak47", "onResponse: "+song);
+                                list.add(new Songs(cover_image,artists,song,url));
+                                adapter.notifyDataSetChanged();
 
                             }
+
                         }catch (JSONException e){
                             e.printStackTrace();
                         }
